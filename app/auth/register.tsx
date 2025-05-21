@@ -1,60 +1,57 @@
-import React, { useState } from 'react'
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { supabase } from '../../lib/supabase'
+import { useRouter } from 'expo-router'; // Menggunakan expo-router untuk navigasi
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Register() {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleRegister = async () => {
-    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
-      return Alert.alert('Error', 'All fields are required.')
-    }
-    if (!email.endsWith('@gmail.com')) {
-      return Alert.alert('Error', 'Email must be a @gmail.com address.')
-    }
-    if (password !== confirmPassword) {
-      return Alert.alert('Error', 'Passwords do not match.')
-    }
-
-    setLoading(true)
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      Alert.alert('Sign Up Error', error.message)
-      setLoading(false)
-      return
-    }
-
-    const user = data?.user ?? data?.session?.user
-    if (!user) {
-      Alert.alert('Error', 'User data is missing after sign up.')
-      setLoading(false)
-      return
-    }
-
-    const { error: insertError } = await supabase.from('profiles').insert({
-      id: user.id,
-      first_name: firstName,
-      last_name: lastName,
-      username,
-      role: 'customer',
-    })
-
-    if (insertError) {
-      Alert.alert('Database Error', insertError.message)
-      setLoading(false)
-      return
-    }
-
-    Alert.alert('Success', 'Registration successful! Please check your email to verify your account.')
-    setLoading(false)
-    // Optional: clear form fields here
+const handleRegister = async () => {
+  if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+    return Alert.alert('Error', 'All fields are required.');
   }
+
+  if (password !== confirmPassword) {
+    return Alert.alert('Error', 'Passwords do not match.');
+  }
+
+  setLoading(true);
+
+  // Kirim data registrasi ke backend Golang yang di-host di Railway
+  try {
+    const response = await fetch('https://projectminyakproduction.up.railway.app/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return Alert.alert('Sign Up Error', data.error || 'Unknown error');
+    }
+
+    Alert.alert('Success', 'Registration successful! Redirecting to login...');
+    setLoading(false);
+    router.push('/auth/login');
+  } catch (error) {
+    console.error(error);
+    Alert.alert('Sign Up Error', 'An error occurred during registration.');
+    setLoading(false);
+  }
+};
+
 
   return (
     <View style={styles.container}>
@@ -69,7 +66,7 @@ export default function Register() {
         <Text style={styles.buttonText}>{loading ? 'Registering...' : 'Register'}</Text>
       </TouchableOpacity>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -78,4 +75,4 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 16 },
   button: { backgroundColor: '#0e1e4d', padding: 16, borderRadius: 8, alignItems: 'center' },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-})
+});
