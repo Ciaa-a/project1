@@ -3,7 +3,7 @@ import { Slot, usePathname, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// Dummy: Ganti nanti dengan Supabase session check
+// Buat dummmy doang, nanti ganti sama supabase e
 const currentRole = 'admin'; // bisa: 'admin', 'manager', 'sales'
 
 const adminRoutes = [

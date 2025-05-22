@@ -12,7 +12,7 @@
 //       return Alert.alert('Error', 'All fields are required.');
 //     }
 
-//     // Kirim permintaan login ke backend Golang yang di-host di Railway
+//     // permintaan login ke backend Golang yang di-host di Railway
 //     try {
 //       const response = await fetch('https://projectminyakproduction.up.railway.app/signin', {
 //         method: 'POST',
@@ -28,7 +28,6 @@
 //         return Alert.alert('Login Failed', data.error || 'Unknown error');
 //       }
 
-//       // Lakukan proses verifikasi dan arahkan pengguna ke halaman dashboard yang sesuai
 //       const userData = data.user;
 //       if (userData && userData.role) {
 //         switch (userData.role) {
